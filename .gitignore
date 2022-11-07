@@ -1,0 +1,4 @@
+*.txt
+*.root
+*.h5
+train/results
