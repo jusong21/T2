@@ -1,0 +1,77 @@
+
+
+def makeCard(num):
+	hist = 'h_1stProb'
+	obs_hist = hist+'_'+str(num)
+	n = str(num)
+
+	datacard=open(cardName+'.txt', "w")
+	datacard.write("* imax 1 \n")
+	datacard.write("* jmax 5 \n")
+	datacard.write("* kmax * \n")
+
+	datacard.write("----------------\n")
+	datacard.write('shapes data_obs * ')
+	datacard.write('/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/random/random_data.root ')
+	datacard.write(obs_hist+'\n')
+	datacard.write('shapes Gen_1 * ')
+	datacard.write('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/Pttbb/fitPttbb/ttbb_fitPttbb.root ')
+	datacard.write(hist+'_Gen_1_'+n+'\n')
+	datacard.write('shapes Gen_2 * ')
+	datacard.write('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/Pttbb/fitPttbb/ttbb_fitPttbb.root ')
+	datacard.write(hist+'_Gen_2_'+n+'\n')
+	datacard.write('shapes Gen_3 * ')
+	datacard.write('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/Pttbb/fitPttbb/ttbb_fitPttbb.root ')
+	datacard.write(hist+'_Gen_3_'+n+'\n')
+	datacard.write('shapes Gen_4 * ')
+	datacard.write('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/Pttbb/fitPttbb/ttbb_fitPttbb.root ')
+	datacard.write(hist+'_Gen_4_'+n+'\n')
+	datacard.write('shapes ttbj * ')
+	datacard.write('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/Pttbb/fitPttbb/ttbj_fitPttbb.root ')
+	datacard.write(hist+'_'+n+'\n')
+	datacard.write('shapes Bkg * ')
+	datacard.write('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/Pttbb/fitPttbb/Bkg_ttcc+ttLF+ttother_fitPttbb.root ')
+	datacard.write(hist+'_'+n+'\n')
+	datacard.write("----------------\n")
+
+	datacard.write("bin bin1")
+	datacard.write("\n")
+
+	datacard.write("observation -1")
+	datacard.write("\n")
+	datacard.write("----------------\n")
+
+	datacard.write("bin			bin1 bin1 bin1 bin1 bin1 bin1")
+	datacard.write("\n")
+
+	datacard.write("process 	")
+	datacard.write('Gen_1 Gen_2 Gen_3 Gen_4 ttbj Bkg')
+	datacard.write('\n')
+
+	datacard.write('process 	-1 -2 -3 -4 1 2 ')
+	datacard.write('\n')
+
+	datacard.write('rate		-1 -1 -1 -1 -1 -1')
+	datacard.write('\n')
+	datacard.write("----------------\n")
+
+	datacard.write("### RUN WITH COMMANDS: ####\n")
+	datacard.write('# '+t2wLine)
+	datacard.write('# Run with command: '+comLine)
+	#datacard.write("# text2workspace.py "+cardName+".txt -o "+cardName+".root -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel "+po+"\n")
+	#datacard.write("# Run with command: combine -M MultiDimFit --algo singles --setParameters=r_bin1=1,r_bin2=1,r_bin3=1,r_bin4=1 -d "+cardName+".root -t 0 \n")
+	datacard.write("############################\n")
+	datacard.close()
+
+t2w = open('t2w.sh', 'w')
+com = open('combine.sh', 'w')
+outDir = './datacards/'
+for i in range(1, 1001):
+	cardName = outDir+'datacard_'+str(i)
+	po ="--PO map='.*/Gen_1:r_bin1[1,0,10]' --PO map='.*/Gen_2:r_bin2[1,0,10]' --PO map='.*/Gen_3:r_bin3[1,0,10]' --PO map='.*/Gen_4:r_bin4[1,0,10]'  --PO map='.*/ttbj:r_bin5[1,1,1]'  --PO map='.*/Bkg:r_bin6[1,1,1]'"
+	t2wLine = "text2workspace.py "+cardName+".txt -o "+cardName+".root -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel "+po+"\n"
+	comLine = "combine -M MultiDimFit --algo singles --setParameters=r_bin1=1,r_bin2=1,r_bin3=1,r_bin4=1,r_bin5=1,r_bin6=1 -d "+cardName+".root -t 0 \n"
+	t2w.write(t2wLine)
+	com.write(comLine)
+	makeCard(i)
+

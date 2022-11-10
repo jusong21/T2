@@ -2,3 +2,5 @@
 *.root
 *.h5
 train/results
+ntuples/arrays
+ntuples/rootfiles

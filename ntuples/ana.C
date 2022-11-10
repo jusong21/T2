@@ -20,7 +20,6 @@ using namespace std;
 using rvec_f = RVec<float>;
 using rvec_b = RVec<bool>;
 using rvec_i = RVec<int>;
-using Impl_i = vector<int, ROOT::Detail::VecOps::RAdoptAllocator<int>>;
 
 //********** sort jets by btag & pT
 vector<int> sortbtag(rvec_f jet_pt, rvec_f jet_eta, rvec_f btag){

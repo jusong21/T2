@@ -1,0 +1,190 @@
+from ROOT import *
+from array import array
+
+def rebinPttbb(f, hist, delIdx):
+	h = f.Get(hist)
+
+	binEdge = [h.GetBinLowEdge(i) for i in range(1, h.GetNbinsX()+1)]
+	binEdge.append(1.0)
+
+	for i in sorted(delIdx, reverse=True):
+		del binEdge[i]
+
+	h_new = h.Rebin(len(binEdge)-1, hist, array('d', binEdge))
+	h_new.Write()
+
+def rebin1stProb(f, hist, delIdx):
+	h = f.Get(hist)
+	rename = hist.split('_')[-1]
+
+	h_new = TH1D('h_1stProb','h_1stProb', 20, 0, 20)
+
+	for ibin in range(1, h.GetNbinsX()+1):
+		split_name = 'h_'+rename+'_Reco_'+str(ibin)
+		h_split = h.ProjectionY(split_name, ibin, ibin)
+
+		binEdge = [h_split.GetBinLowEdge(i) for i in range(1, h_split.GetNbinsX()+1)]
+		binEdge.append(1.0)
+ 
+		for i in sorted(delIdx, reverse=True):
+			del binEdge[i]
+
+		h_rebin = h_split.Rebin(len(binEdge)-1, split_name, array('d', binEdge))
+		h_rebin.Write()
+
+		for jbin in range(1, h_rebin.GetNbinsX()+1):
+			#print 'ibin ', ibin, 'jbin ', jbin
+			binN = (ibin-1)*5 + jbin
+			print 'bin ', binN
+			h_new.SetBinContent( binN, h_rebin.GetBinContent(jbin) )
+	h_new.Write()
+
+del_Pttbb = [17, 18, 19]
+del_1stProb = [1, 2, 3, 4, 5, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19]
+
+# ttbj
+print '\nRebin ttbj'
+f_ttbj = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/scaled/ttbj.root')
+
+f_ttbj_out = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/rebin/rebinned_ttbj.root', 'RECREATE')
+
+rebinPttbb(f_ttbj, 'h_Pttbb', del_Pttbb)
+rebin1stProb(f_ttbj, 'h_dRbb_1stProb', del_1stProb)
+
+f_ttbj_out.Close()
+print 'ttbj done'
+
+# ttcc
+print '\nRebin ttcc'
+f_ttcc = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/scaled/ttcc.root')
+
+f_ttcc_out = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/rebin/rebinned_ttcc.root', 'RECREATE')
+
+rebinPttbb(f_ttcc, 'h_Pttbb', del_Pttbb)
+rebin1stProb(f_ttcc, 'h_dRbb_1stProb', del_1stProb)
+
+f_ttcc_out.Close()
+print 'ttcc done'
+
+# ttLF
+print '\nRebin ttLF'
+f_ttLF = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/scaled/ttLF.root')
+
+f_ttLF_out = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/rebin/rebinned_ttLF.root', 'RECREATE')
+
+rebinPttbb(f_ttLF, 'h_Pttbb', del_Pttbb)
+rebin1stProb(f_ttLF, 'h_dRbb_1stProb', del_1stProb)
+
+f_ttLF_out.Close()
+print 'ttLF done'
+
+# ttother
+print '\nRebin ttother'
+f_ttother = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/scaled/ttother.root')
+
+f_ttother_out = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/rebin/rebinned_ttother.root', 'RECREATE')
+
+rebinPttbb(f_ttother, 'h_Pttbb', del_Pttbb)
+rebin1stProb(f_ttother, 'h_dRbb_1stProb', del_1stProb)
+
+f_ttother_out.Close()
+print 'ttother done'
+
+
+
+
+#def rebin(files, hist):
+#	f = TFile(files)
+#	f_n = files.split('/')[-1]
+#	f_out = TFile.Open('/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/rebin/rebinned_'+f_n, 'RECREATE')
+#	#f_out = TFile.Open('test.root', 'RECREATE')
+#	print f_out, ' ', hist
+#
+#	h = f.Get(hist)
+#	rename = hist.split('_')[-1]
+#
+#	h_par = TH1D('h_1stProb_parReco','h_1stProb_parReco', 20, 0, 20)
+#
+#	for ibin in range(1, h.GetNbinsX()+1):
+#		split_name = 'h_'+rename+'_Reco_'+str(ibin)
+#		h_split = h.ProjectionY(split_name, ibin, ibin)
+#
+#		binEdge = [h_split.GetBinLowEdge(i) for i in range(1, h_split.GetNbinsX()+1)]
+#		binEdge.append(1.0)
+# 
+#		delIdx = [1, 2, 3, 4, 5, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19]
+#	
+#		for i in sorted(delIdx, reverse=True):
+#			del binEdge[i]
+#
+#		h_rebin = h_split.Rebin(len(binEdge)-1, split_name, array('d', binEdge))
+#		h_rebin.Write()
+#
+#		for jbin in range(1, h_rebin.GetNbinsX()+1):
+#			#print 'ibin ', ibin, 'jbin ', jbin
+#			binN = (ibin-1)*5 + jbin
+#			print 'bin ', binN
+#			h_par.SetBinContent( binN, h_rebin.GetBinContent(jbin) )
+#
+#	h_par.Write()
+#
+##rebin("ttbb.root")
+#rebin("/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/scaled/ttbj.root", 'h_dRbb_1stProb')
+#rebin("/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/scaled/ttcc.root", 'h_dRbb_1stProb')
+#rebin("/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/scaled/ttLF.root", 'h_dRbb_1stProb')
+#rebin("/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/scaled/ttother.root", 'h_dRbb_1stProb')
+##rebin("Bkg_ttcc+ttLF+ttother.root")
+#
+#
+#def rebin(files):
+#	f = TFile(files)
+#	f_n = files.split('/')[-1]
+#	f_out = TFile.Open('/home/juhee5819/cheer/HiggsAnalysis/combineTool/scale/rebin/rebinned_'+f_n, 'RECREATE')
+#	print f_out
+#
+#	hists = ['h_Pttbb', 'h_1stProb']
+#	
+#	# rebin 1D
+#	for hist in hists:
+#		print hist
+#		h = f.Get(hist)
+#		binEdge = [h.GetBinLowEdge(i) for i in range(1, h.GetNbinsX()+1)]
+#		binEdge.append(1.0)
+# 
+# 		if '1stProb' in hist:
+#			# 3/5/4/4/4
+#			#delIdx = [1, 2, 4, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19]
+#			#delIdx = [1, 2, 3, 4, 5]
+#			delIdx = [1, 2, 3, 4, 5, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19]
+#		elif 'Pttbb' in hist:
+#			#  3/3/4/5/5
+#			#delIdx = [1, 2, 4, 5, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19]
+#			delIdx = [17, 18, 19]
+#
+#		for i in sorted(delIdx, reverse=True):
+#			del binEdge[i]
+#
+#		#print (binEdge)
+#		#print len(binEdge)
+#		h_new = h.Rebin(len(binEdge)-1, hist, array('d', binEdge))
+#		h_new.Write()
+#	
+#	# rebin 2D
+#	hist = 'h_dRbb_1stProb'
+#	h = f.Get(hist)
+#	binEdge = [ h.GetYaxis().GetBinLowEdge(i) for i in range(1, h.GetNbinsY()+1)]
+#	binEdge.append(1.0)
+#	delIdx = [1, 2, 3, 4, 5, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19]
+#	
+#	for i in sorted(delIdx, reverse=True):
+#		del binEdge[i]
+#
+#	h_new = h.RebinY(len(binEdge)-1, hist, array('d', binEdge))
+#	h_new.Write()
+#	
+#
+#
+#	#f_out.Write()
+#	f_out.Close()
+#	#print(binEdge)
+

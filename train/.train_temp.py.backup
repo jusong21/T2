@@ -4,7 +4,6 @@ import sys, os, re
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ['CUDA_VISIBLE_DEVICES'] = '2, 3'
 
-import uproot
 import numpy as np
 from keras.models import Model, Sequential, load_model
 from keras.layers import Input, Dense, Dropout, LSTM, Concatenate
@@ -14,7 +13,7 @@ from array import array
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
-import seaborn as sns
+#import seaborn as sns
 from keras.utils.np_utils import to_categorical
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.utils.vis_utils import plot_model
@@ -119,33 +118,29 @@ def build_model(output, model_path):
 	return model
 
 # input files
-ttbb_2016preVFP = uproot.open('~/cheer/T2/ntuples/rootfiles/ttbb_ULv2_2016preVFP.root')['tree'].arrays(library='pd')
-ttbb_2016postVFP = uproot.open('~/cheer/T2/ntuples/rootfiles/ttbb_ULv2_2016postVFP.root')['tree'].arrays(library='pd')
-ttbb_2017 = uproot.open('~/cheer/T2/ntuples/rootfiles/ttbb_ULv2_2017.root')['tree'].arrays(library='pd')
-ttbb_2018 = uproot.open('~/cheer/T2/ntuples/rootfiles/ttbb_ULv2_2018.root')['tree'].arrays(library='pd')
+ttbb_2016preVFP = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttbb_ULv2_2016preVFP.h5" )
+ttbb_2016postVFP = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttbb_ULv2_2016postVFP.h5" )
+ttbb_2017 = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttbb_ULv2_2017.h5" )
+ttbb_2018 = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttbb_ULv2_2018.h5" )
 
-ttbj_2016preVFP = uproot.open('~/cheer/T2/ntuples/rootfiles/ttbj_ULv2_2016preVFP.root')['tree'].arrays(library='pd')
-ttbj_2016postVFP = uproot.open('~/cheer/T2/ntuples/rootfiles/ttbj_ULv2_2016postVFP.root')['tree'].arrays(library='pd')
-ttbj_2017 = uproot.open('~/cheer/T2/ntuples/rootfiles/ttbj_ULv2_2017.root')['tree'].arrays(library='pd')
-ttbj_2018 = uproot.open('~/cheer/T2/ntuples/rootfiles/ttbj_ULv2_2018.root')['tree'].arrays(library='pd')
+ttbj_2016preVFP = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttbj_ULv2_2016preVFP.h5" )
+ttbj_2016postVFP = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttbj_ULv2_2016postVFP.h5" )
+ttbj_2017 = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttbj_ULv2_2017.h5" )
+ttbj_2018 = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttbj_ULv2_2018.h5" )
 
-ttcc_2016preVFP = uproot.open('~/cheer/T2/ntuples/rootfiles/ttcc_ULv2_2016preVFP.root')['tree'].arrays(library='pd')
-ttcc_2016postVFP = uproot.open('~/cheer/T2/ntuples/rootfiles/ttcc_ULv2_2016postVFP.root')['tree'].arrays(library='pd')
-ttcc_2017 = uproot.open('~/cheer/T2/ntuples/rootfiles/ttcc_ULv2_2017.root')['tree'].arrays(library='pd')
-ttcc_2018 = uproot.open('~/cheer/T2/ntuples/rootfiles/ttcc_ULv2_2018.root')['tree'].arrays(library='pd')
+ttcc_2016preVFP = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttcc_ULv2_2016preVFP.h5" )
+ttcc_2016postVFP = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttcc_ULv2_2016postVFP.h5" )
+ttcc_2017 = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttcc_ULv2_2017.h5" )
+ttcc_2018 = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttcc_ULv2_2018.h5" )
 
-ttLF_2016preVFP = uproot.open('~/cheer/T2/ntuples/rootfiles/ttLF_ULv2_2016preVFP.root')['tree'].arrays(library='pd')
-ttLF_2016postVFP = uproot.open('~/cheer/T2/ntuples/rootfiles/ttLF_ULv2_2016postVFP.root')['tree'].arrays(library='pd')
-ttLF_2017 = uproot.open('~/cheer/T2/ntuples/rootfiles/ttLF_ULv2_2017.root')['tree'].arrays(library='pd')
-ttLF_2018 = uproot.open('~/cheer/T2/ntuples/rootfiles/ttLF_ULv2_2018.root')['tree'].arrays(library='pd')
-
+ttLF_2016preVFP = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttLF_ULv2_2016preVFP.h5" )
+ttLF_2016postVFP = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttLF_ULv2_2016postVFP.h5" )
+ttLF_2017 = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttLF_ULv2_2017.h5" )
+ttLF_2018 = pd.read_hdf( "/home/juhee5819/cheer/T2/ntuples/arrays/ttLF_ULv2_2018.h5" )
 
 # variables
-#event_var = ['nbjets_m', 'ncjets_m', 'ngoodjets', 'Ht', 'lepton_pt', 'lepton_eta', 'lepton_phi', 'lepton_m', 'MET_pt', 'MET_phi', "dEta12", "dEta13", "dEta14", "dEta23", "dEta24", "dEta34", "dPhi12", "dPhi13", "dPhi14", "dPhi23", "dPhi24", "dPhi34", "invm12", "invm13", "invm14", "invm23", "invm24", "invm34", "dRnulep12", "dRnulep13", "dRnulep14", "dRnulep23", "dRnulep24", "dRnulep34"]
-event_var = ['nbjets_m', 'ncjets_m', 'ngoodjets', 'Ht', 'lepton_pt', 'lepton_eta', 'lepton_phi', 'lepton_m', "dEta12", "dEta13", "dEta14", "dEta23", "dEta24", "dEta34", "dPhi12", "dPhi13", "dPhi14", "dPhi23", "dPhi24", "dPhi34", "invm12", "invm13", "invm14", "invm23", "invm24", "invm34", "dRnulep12", "dRnulep13", "dRnulep14", "dRnulep23", "dRnulep24", "dRnulep34"]
-#event_var = ['nbjets_m', 'ncjets_m', 'ngoodjets', 'Ht', 'lepton_pt', 'lepton_eta', 'lepton_phi', 'lepton_m', "dEta12", "dEta13", "dEta14", "dEta23", "dEta24", "dEta34", "dPhi12", "dPhi13", "dPhi14", "dPhi23", "dPhi24", "dPhi34", "invm12", "invm13", "invm14", "invm23", "invm24", "invm34"]
-#jet_var = ["jet1_pt", "jet1_eta", "jet1_m", "jet1_btag", "jet1_cvsl", "dRlep1", "dRnu1", "invmlep1", "jet2_pt", "jet2_eta", "jet2_m", "jet2_btag", "jet2_cvsl", "dRlep2", "dRnu2", "invmlep2", "jet3_pt", "jet3_eta", "jet3_m", "jet3_btag", "jet3_cvsl", "dRlep3", "dRnu3", "invmlep3", "jet4_pt", "jet4_eta", "jet4_m", "jet4_btag", "jet4_cvsl", "dRlep4", "dRnu4", "invmlep4"]
-jet_var = ["jet1_pt", "jet1_eta", "jet1_btag", "jet1_cvsl", "dRlep1", "invmlep1", "jet2_pt", "jet2_eta", "jet2_btag", "jet2_cvsl", "dRlep2", "invmlep2", "jet3_pt", "jet3_eta", "jet3_btag", "jet3_cvsl", "dRlep3", "invmlep3", "jet4_pt", "jet4_eta", "jet4_btag", "jet4_cvsl", "dRlep4", "invmlep4"]
+event_var = ['nbjets_m', 'ncjets_m', 'ngoodjets', 'Ht', 'lepton_pt', 'lepton_eta', 'lepton_phi', 'lepton_m', 'MET_pt', 'MET_phi', "dEta12", "dEta13", "dEta14", "dEta23", "dEta24", "dEta34", "dPhi12", "dPhi13", "dPhi14", "dPhi23", "dPhi24", "dPhi34", "invm12", "invm13", "invm14", "invm23", "invm24", "invm34", "dRnulep12", "dRnulep13", "dRnulep14", "dRnulep23", "dRnulep24", "dRnulep34"]
+jet_var = ["jet1_pt", "jet1_eta", "jet1_m", "jet1_btag", "jet1_cvsl", "dRlep1", "dRnu1", "invmlep1", "jet2_pt", "jet2_eta", "jet2_m", "jet2_btag", "jet2_cvsl", "dRlep2", "dRnu2", "invmlep2", "jet3_pt", "jet3_eta", "jet3_m", "jet3_btag", "jet3_cvsl", "dRlep3", "dRnu3", "invmlep3", "jet4_pt", "jet4_eta", "jet4_m", "jet4_btag", "jet4_cvsl", "dRlep4", "dRnu4", "invmlep4"]
 #jet_var = ["jet1_pt", "jet1_eta", "jet1_btag", "dRlep1", "dRnu1", "invmlep1", "jet2_pt", "jet2_eta", "jet2_btag", "dRlep2", "dRnu2", "invmlep2", "jet3_pt", "jet3_eta", "jet3_btag", "dRlep3", "dRnu3", "invmlep3", "jet4_pt", "jet4_eta", "jet4_btag", "dRlep4", "dRnu4", "invmlep4"]
 #jet_var = ["jet1_pt", "jet1_eta", "jet1_m", "jet1_btag", "dRlep1", "dRnu1", "invmlep1", "jet2_pt", "jet2_eta", "jet2_m", "jet2_btag", "dRlep2", "dRnu2", "invmlep2", "jet3_pt", "jet3_eta", "jet3_m", "jet3_btag", "dRlep3", "dRnu3", "invmlep3", "jet4_pt", "jet4_eta", "jet4_m", "jet4_btag", "dRlep4", "dRnu4", "invmlep4"]
 nvar = len(event_var+jet_var)
@@ -237,41 +232,42 @@ with open('results.txt', "a") as f_log:
    f_log.write('best epoch: '+str(bestepoch)+'  jet accuracy: '+str(correct)+'/'+str(len(valid_out))+'='+str(accuracy)+'\n\n')
 #
 with open(newDir+'/des.txt', "a") as f_log:
-	f_log.write('###  '+strtm+'\n')
-	f_log.write(newDir+'\n')
-	f_log.write('nvar: '+str(nvar)+'\n')
-	f_log.write('training samples: '+str(len(train_out))+'   validation samples: '+str(len(valid_out))+'\n')
-	f_log.write('best epoch: '+str(bestepoch)+'   accuracy: '+str(correct)+'/'+str(len(valid_out))+'='+str(accuracy)+'\n')
-	f_log.write('conf jet: \n{}\n'.format(np.array2string(confusion)))
-   
-plotDir = newDir+'/'
-print("Plotting scores")
-plt.plot(hist.history['acc'])
-plt.plot(hist.history['val_acc'])
-plt.title('Accuracy')
-plt.ylabel('Accuracy')
-plt.xlabel('Epochs')
-plt.legend(['Train','Test'], loc='lower right')
-plt.savefig(os.path.join(plotDir, 'accuracy.pdf'), bbox_inches='tight')
-plt.gcf().clear()
-
-plt.plot(hist.history['loss'])
-plt.plot(hist.history['val_loss'])
-plt.title('Loss')
-plt.ylabel('Loss')
-plt.xlabel('Epochs')
-plt.legend(['Train','Test'],loc='upper right')
-plt.savefig(os.path.join(plotDir, 'loss.pdf'), bbox_inches='tight')
-plt.gcf().clear()
-
-##Heatmap
-plt.rcParams['figure.figsize'] = [7.5, 6]
-cfmt = lambda x,pos: '{:.0%}'.format(x)
-heatmap = sns.heatmap(confusion/sum_row, annot=True, cmap='YlGnBu', fmt='.0%', annot_kws={"size":9}, vmax=1, cbar_kws={'format': FuncFormatter(cfmt)} )
-plt.title('Jet Permutation', fontsize=15)
-plt.xlabel('pred.', fontsize=12)
-plt.ylabel('real', fontsize=12)
-heatmap.set_yticklabels(heatmap.get_yticklabels(), rotation=0)
-plt.savefig(os.path.join(plotDir, 'heatmap.pdf'), bbox_inches='tight')
-plt.gcf().clear()
-
+	#f_log.write("trainInput "+input_2018+'  ')
+   	f_log.write('###  '+strtm+'\n')
+	#f_log.write(newDir+'\n')
+#	f_log.write('nvar: '+str(nvar)+'\n')
+#	f_log.write('training samples: '+str(len(train_out))+'   validation samples: '+str(len(valid_out))+'\n')
+#	f_log.write('best epoch: '+str(bestepoch)+'   accuracy: '+str(correct)+'/'+str(len(valid_out))+'='+str(accuracy)+'\n')
+#	f_log.write('conf jet: \n{}\n'.format(np.array2string(confusion)))
+#   
+#plotDir = newDir+'/'
+#print("Plotting scores")
+#plt.plot(hist.history['acc'])
+#plt.plot(hist.history['val_acc'])
+#plt.title('Accuracy')
+#plt.ylabel('Accuracy')
+#plt.xlabel('Epochs')
+#plt.legend(['Train','Test'], loc='lower right')
+#plt.savefig(os.path.join(plotDir, 'accuracy.pdf'), bbox_inches='tight')
+#plt.gcf().clear()
+#
+#plt.plot(hist.history['loss'])
+#plt.plot(hist.history['val_loss'])
+#plt.title('Loss')
+#plt.ylabel('Loss')
+#plt.xlabel('Epochs')
+#plt.legend(['Train','Test'],loc='upper right')
+#plt.savefig(os.path.join(plotDir, 'loss.pdf'), bbox_inches='tight')
+#plt.gcf().clear()
+#
+###Heatmap
+#plt.rcParams['figure.figsize'] = [7.5, 6]
+#cfmt = lambda x,pos: '{:.0%}'.format(x)
+#heatmap = sns.heatmap(confusion/sum_row, annot=True, cmap='YlGnBu', fmt='.0%', annot_kws={"size":9}, vmax=1, cbar_kws={'format': FuncFormatter(cfmt)} )
+#plt.title('Jet Permutation', fontsize=15)
+#plt.xlabel('pred.', fontsize=12)
+#plt.ylabel('real', fontsize=12)
+#heatmap.set_yticklabels(heatmap.get_yticklabels(), rotation=0)
+#plt.savefig(os.path.join(plotDir, 'heatmap.pdf'), bbox_inches='tight')
+#plt.gcf().clear()
+#
