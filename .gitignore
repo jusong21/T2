@@ -1,6 +1,7 @@
 *.txt
 *.root
 *.h5
+*.sh
 train/results
 ntuples/arrays
 ntuples/rootfiles
