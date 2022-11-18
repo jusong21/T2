@@ -1,217 +1,82 @@
 from ROOT import *
 from array import array
+import os,sys
 
-def rebin(f, hist, hist_name, lastbin, delIdx):
+inputDir = '/home/juhee5819/cheer/T2/combineTool/data/scaled/'
+outDir = '/home/juhee5819/cheer/T2/combineTool/data/rebin/'
+del_Pttbb = [ 13, 14, 15,  17, 18, 19]
+del_1stProb = [1, 2, 3, 4,  7, 9, 11, 13, 15, 17, 19]
+
+def superHist(f):
+	h = f.Get('h_dRbb_1stProb')
+	nbins = h.GetNbinsX() * h.GetNbinsY()
+	h_super = TH1D('h_1stProb_super', 'h_1stProb_super', nbins, 0, nbins)
+	# ttbb
+	if 'ttbb' in f.GetName():
+		print('This is ttbb precess')
+		for ibin in range(1, h.GetNbinsX()+1):
+			h_gen_super = TH1D('h_1stProb_Gen_'+str(ibin)+'_super', 'h_1stProb_Gen_'+str(ibin)+'_super', nbins, 0, nbins)
+			for jbin in range(1, h.GetNbinsX()+1):
+				h_gen = f.Get('h_1stProb_Gen_'+str(ibin)+'_Reco_'+str(jbin))
+				for kbin in range(1, h_gen.GetNbinsX()+1):
+					binN = (jbin-1) * h_gen.GetNbinsX() + kbin
+					h_gen_super.SetBinContent(binN, h_gen.GetBinContent(kbin))
+			h_gen_super.Write()
+			print('>>> Super histogram:', h_gen_super.GetName(), 'done')
+			h_super.Add(h_gen_super)
+
+	# not ttbb
+	else:
+		for ibin in range(1, h.GetNbinsX()+1):
+			h_split = h.ProjectionY('h_1stProb_Reco_'+str(ibin), ibin, ibin)
+			for jbin in range(1, h_split.GetNbinsX()+1):
+				binN = (ibin-1) * h_split.GetNbinsX() + jbin
+				h_super.SetBinContent(binN, h_split.GetBinContent(jbin))
+
+	h_super.Write()
+	print('>>> Super histogram:', h_super.GetName(), 'done')
+
+def rebin(f, hist, hist_name, delIdx):
 	h = f.Get(hist)
-
+	lastbin = h.GetNbinsX() * h.GetBinWidth(1)
 	binEdge = [h.GetBinLowEdge(i) for i in range(1, h.GetNbinsX()+1)]
 	binEdge.append(lastbin)
 
+	if '1stProb' in hist:
+		temp = delIdx[:]
+		for i in range(1, 4):
+			add = [delIdx[j]+20*i for j in range(len(delIdx))]
+			temp += add
+		delIdx = temp[:]
+
 	for idel in sorted(delIdx, reverse=True):
 		del binEdge[idel]
-		#print idel
-		#print binEdge
-
+	
 	h_rebin = h.Rebin(len(binEdge)-1, hist, array('d', binEdge))
 	h_rebin.SetName(hist_name)
 	h_rebin.SetTitle(hist_name)
 	h_rebin.Write()
+	print('>>> Rebin histgram:', h_rebin.GetName(), 'done')
 
+# main
+for target in os.listdir(inputDir):
+	if not target.endswith('.root'):
+		continue
+	process = target.split('.')[0]
+	print('\n>>> Rebinning', process)
+	f_in = TFile.Open(inputDir+target, 'READ')
+	f_out = TFile.Open(outDir+'rebinned_'+process+'.root', 'RECREATE')
+	superHist(f_in)
 
-def mkDel(delList):
-	print delList
-	temp = delList
-	for i in range(1, 4):
-		a = [delList[j]+20*i for j in range(len(delList))]
-		temp = temp+a
-	print temp
-	return temp
+	rebin(f_in, 'h_Pttbb', 'h_Pttbb', del_Pttbb)
+	if 'ttbb' in target:
+		rebin(f_out, 'h_1stProb_Gen_1_super', 'h_1stProb_Gen_1', del_1stProb)
+		rebin(f_out, 'h_1stProb_Gen_2_super', 'h_1stProb_Gen_2', del_1stProb)
+		rebin(f_out, 'h_1stProb_Gen_3_super', 'h_1stProb_Gen_3', del_1stProb)
+		rebin(f_out, 'h_1stProb_Gen_4_super', 'h_1stProb_Gen_4', del_1stProb)
+	else:
+		rebin(f_out, 'h_1stProb_super', 'h_1stProb', del_1stProb)
 
-#del_Pttbb_v1 = [19]
-#del_1stProb_v1 = mkDel([1, 2, 3])
-
-#del_Pttbb_v2 = [ 18, 19]
-#del_1stProb_v2 = mkDel([1, 2, 3, 4, 5, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19])
-
-del_Pttbb_v3 = [ 13, 14, 15,  17, 18, 19]
-del_1stProb_v3 = mkDel([1, 2, 3, 4,  7, 9, 11, 13, 15, 17, 19])
-
-print '\nRebin ttbb'
-inputDir = '/home/juhee5819/cheer/T2/combineTool/data/scaled/'
-outDir = '/home/juhee5819/cheer/T2/combineTool/data/rebin/'
-
-#f_ttbb = TFile(inputDir+'ttbb.root')
-#f_ttbb_out = TFile(outDir+'rebinned_ttbb_v1.root', 'RECREATE')
-#rebin(f_ttbb, 'h_Pttbb', 'h_Pttbb', 1, del_Pttbb_v1)
-#rebin(f_ttbb, 'h_1stProb_super_Gen_1', 'h_1stProb_Gen_1', 80, del_1stProb_v1)
-#rebin(f_ttbb, 'h_1stProb_super_Gen_2', 'h_1stProb_Gen_2', 80, del_1stProb_v1)
-#rebin(f_ttbb, 'h_1stProb_super_Gen_3', 'h_1stProb_Gen_3', 80, del_1stProb_v1)
-#rebin(f_ttbb, 'h_1stProb_super_Gen_4', 'h_1stProb_Gen_4', 80, del_1stProb_v1)
-#f_ttbb_out.Close()
-#print 'ttbb done'
-#
-## ttbj
-#print '\nRebin ttbj'
-#
-#f_ttbj = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/scaled/ttbj.root')
-#f_ttbj_out = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/rebin/rebinned_ttbj_v1.root', 'RECREATE')
-#rebin(f_ttbj, 'h_Pttbb', 'h_Pttbb', 1, del_Pttbb_v1)
-#rebin(f_ttbj, 'h_1stProb_super', 'h_1stProb', 80, del_1stProb_v1)
-#f_ttbj_out.Close()
-#print 'ttbj done'
-#
-## Bkg
-#print '\nRebin Bkg'
-#
-#f_Bkg = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/scaled/Bkg_ttcc+ttLF+ttother.root')
-#f_Bkg_out = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/rebin/rebinned_Bkg_v1.root', 'RECREATE')
-#rebin(f_Bkg, 'h_Pttbb', 'h_Pttbb', 1, del_Pttbb_v1)
-#print 'done'
-#rebin(f_Bkg, 'h_1stProb_super', 'h_1stProb',  80, del_1stProb_v1)
-#f_Bkg_out.Close()
-#print 'Bkg done'
-#
-#
-## data
-#f_data_Pttbb = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/random/data_Pttbb.root')
-#f_data_1stProb = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/random/scaleRatio/data_1stProb.root')
-#f_data_out = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/rebin/rebinned_data_v1.root', 'RECREATE')
-#for i in range(1, 1001):
-#	ihist = 'h_Pttbb_'+str(i)
-#	rebin(f_data_Pttbb, ihist, ihist, 1, del_Pttbb_v1)
-#
-#for i in range(1, 1001):
-#	ihist = 'h_1stProb_'+str(i)
-#	rebin(f_data_1stProb, ihist, ihist, 80, del_1stProb_v1)
-#
-#f_data_out.Close()
-#	
-#
-#
-#print '\nRebin ttbb'
-#
-#f_ttbb = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/scaled/ttbb.root')
-#f_ttbb_out = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/rebin/rebinned_ttbb_v2.root', 'RECREATE')
-#rebin(f_ttbb, 'h_Pttbb', 'h_Pttbb', 1, del_Pttbb_v2)
-#rebin(f_ttbb, 'h_1stProb_super_Gen_1', 'h_1stProb_Gen_1', 80, del_1stProb_v2)
-#rebin(f_ttbb, 'h_1stProb_super_Gen_2', 'h_1stProb_Gen_2', 80, del_1stProb_v2)
-#rebin(f_ttbb, 'h_1stProb_super_Gen_3', 'h_1stProb_Gen_3', 80, del_1stProb_v2)
-#rebin(f_ttbb, 'h_1stProb_super_Gen_4', 'h_1stProb_Gen_4', 80, del_1stProb_v2)
-#f_ttbb_out.Close()
-#print 'ttbb done'
-#
-## ttbj
-#print '\nRebin ttbj'
-#
-#f_ttbj = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/scaled/ttbj.root')
-#f_ttbj_out = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/rebin/rebinned_ttbj_v2.root', 'RECREATE')
-#rebin(f_ttbj, 'h_Pttbb', 'h_Pttbb', 1, del_Pttbb_v2)
-#rebin(f_ttbj, 'h_1stProb_super', 'h_1stProb', 80, del_1stProb_v2)
-#f_ttbj_out.Close()
-#print 'ttbj done'
-#
-## Bkg
-#print '\nRebin Bkg'
-#
-#f_Bkg = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/scaled/Bkg_ttcc+ttLF+ttother.root')
-#f_Bkg_out = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/rebin/rebinned_Bkg_v2.root', 'RECREATE')
-#rebin(f_Bkg, 'h_Pttbb', 'h_Pttbb', 1, del_Pttbb_v2)
-#print 'done'
-#rebin(f_Bkg, 'h_1stProb_super', 'h_1stProb',  80, del_1stProb_v2)
-#f_Bkg_out.Close()
-#print 'Bkg done'
-#
-#
-## data
-#f_data_Pttbb = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/random/data_Pttbb.root')
-#f_data_1stProb = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/random/scaleRatio/data_1stProb.root')
-#f_data_out = TFile('/home/juhee5819/cheer/HiggsAnalysis/combineTool/data/rebin/rebinned_data_v2.root', 'RECREATE')
-#for i in range(1, 1001):
-#	ihist = 'h_Pttbb_'+str(i)
-#	rebin(f_data_Pttbb, ihist, ihist, 1, del_Pttbb_v2)
-#
-#for i in range(1, 1001):
-#	ihist = 'h_1stProb_'+str(i)
-#	rebin(f_data_1stProb, ihist, ihist, 80, del_1stProb_v2)
-#
-#f_data_out.Close()
-	
-
-
-print '\nRebin ttbb'
-
-f_ttbb = TFile(inputDir+'ttbb.root')
-f_ttbb_out = TFile(outDir+'rebinned_ttbb.root', 'RECREATE')
-rebin(f_ttbb, 'h_Pttbb', 'h_Pttbb', 1, del_Pttbb_v3)
-rebin(f_ttbb, 'h_1stProb_super_Gen_1', 'h_1stProb_Gen_1', 80, del_1stProb_v3)
-rebin(f_ttbb, 'h_1stProb_super_Gen_2', 'h_1stProb_Gen_2', 80, del_1stProb_v3)
-rebin(f_ttbb, 'h_1stProb_super_Gen_3', 'h_1stProb_Gen_3', 80, del_1stProb_v3)
-rebin(f_ttbb, 'h_1stProb_super_Gen_4', 'h_1stProb_Gen_4', 80, del_1stProb_v3)
-f_ttbb_out.Close()
-print 'ttbb done'
-
-# ttbj
-print '\nRebin ttbj'
-
-f_ttbj = TFile(inputDir+'ttbj.root')
-f_ttbj_out = TFile(outDir+'rebinned_ttbj.root', 'RECREATE')
-rebin(f_ttbj, 'h_Pttbb', 'h_Pttbb', 1, del_Pttbb_v3)
-rebin(f_ttbj, 'h_1stProb_super', 'h_1stProb', 80, del_1stProb_v3)
-f_ttbj_out.Close()
-print 'ttbj done'
-
-# Bkg
-print '\nRebin Bkg'
-
-f_Bkg = TFile(inputDir+'Bkg_ttcc+ttLF+ttother.root')
-f_Bkg_out = TFile(outDir+'rebinned_Bkg.root', 'RECREATE')
-rebin(f_Bkg, 'h_Pttbb', 'h_Pttbb', 1, del_Pttbb_v3)
-print 'done'
-rebin(f_Bkg, 'h_1stProb_super', 'h_1stProb',  80, del_1stProb_v3)
-f_Bkg_out.Close()
-print 'Bkg done'
-
-print '\nRebin TTToHadronic'
-
-f_TTToHadronic = TFile(inputDir+'TTToHadronic.root')
-f_TTToHadronic_out = TFile(outDir+'rebinned_TTToHadronic.root', 'RECREATE')
-rebin(f_TTToHadronic, 'h_Pttbb', 'h_Pttbb', 1, del_Pttbb_v3)
-rebin(f_TTToHadronic, 'h_1stProb_super', 'h_1stProb', 80, del_1stProb_v3)
-f_TTToHadronic_out.Close()
-print 'TTToHadronic done'
-
-print '\nRebin WJetsToLNu'
-
-f_WJetsToLNu = TFile(inputDir+'WJetsToLNu.root')
-f_WJetsToLNu_out = TFile(outDir+'rebinned_WJetsToLNu.root', 'RECREATE')
-rebin(f_WJetsToLNu, 'h_Pttbb', 'h_Pttbb', 1, del_Pttbb_v3)
-rebin(f_WJetsToLNu, 'h_1stProb_super', 'h_1stProb', 80, del_1stProb_v3)
-f_WJetsToLNu_out.Close()
-print 'WJetsToLNu done'
-
-
-print '\nRebin TTTo2L2Nu'
-
-f_TTTo2L2Nu = TFile(inputDir+'TTTo2L2Nu.root')
-f_TTTo2L2Nu_out = TFile(outDir+'rebinned_TTTo2L2Nu.root', 'RECREATE')
-rebin(f_TTTo2L2Nu, 'h_Pttbb', 'h_Pttbb', 1, del_Pttbb_v3)
-rebin(f_TTTo2L2Nu, 'h_1stProb_super', 'h_1stProb', 80, del_1stProb_v3)
-f_TTTo2L2Nu_out.Close()
-print 'TTTo2L2Nu done'
-
-# data
-f_data_Pttbb = TFile(inputDir+'../random/data_Pttbb.root')
-f_data_1stProb = TFile(inputDir+'../random/scaleRatio/data_1stProb.root')
-f_data_out = TFile(outDir+'rebinned_data.root', 'RECREATE')
-for i in range(1, 1001):
-	ihist = 'h_Pttbb_'+str(i)
-	rebin(f_data_Pttbb, ihist, ihist, 1, del_Pttbb_v3)
-
-for i in range(1, 1001):
-	ihist = 'h_1stProb_'+str(i)
-	rebin(f_data_1stProb, ihist, ihist, 80, del_1stProb_v3)
-
-f_data_out.Close()
-	
-
+	f_out.Close()
+	print('>>>', process, 'done')
 
